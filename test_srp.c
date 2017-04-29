@@ -7,9 +7,9 @@
 #include "srp.h"
 
 
-#define NITER          100
-#define TEST_HASH      SRP_SHA1
-#define TEST_NG        SRP_NG_1024
+#define NITER          1
+#define TEST_HASH      SRP_SHA512
+#define TEST_NG        SRP_NG_3072
 
 unsigned long long get_usec()
 {
@@ -56,7 +56,7 @@ int main( int argc, char * argv[] )
     const char * g_hex         = 0;
     
     SRP_HashAlgorithm alg     = TEST_HASH;
-    SRP_NGType        ng_type = SRP_NG_8192; //TEST_NG;
+    SRP_NGType        ng_type = SRP_NG_3072; //TEST_NG;
     
     if (ng_type == SRP_NG_CUSTOM)
     {
@@ -70,6 +70,8 @@ int main( int argc, char * argv[] )
                 strlen(password), 
                 &bytes_s, &len_s, &bytes_v, &len_v, n_hex, g_hex );
     
+    printf("len_s: %d\n", len_s);
+    printf("len_v: %d\n", len_v);
 
     
     start = get_usec();
@@ -81,11 +83,13 @@ int main( int argc, char * argv[] )
                              strlen(password), n_hex, g_hex );
 
         srp_user_start_authentication( usr, &auth_username, &bytes_A, &len_A );
+    printf("len_A: %d\n", len_A);
 
         /* User -> Host: (username, bytes_A) */
         ver =  srp_verifier_new( alg, ng_type, username, bytes_s, len_s, bytes_v, len_v, 
                                  bytes_A, len_A, & bytes_B, &len_B, n_hex, g_hex );
         
+    printf("len_B: %d\n", len_B);
         if ( !bytes_B )
         {
             printf("Verifier SRP-6a safety check violated!\n");
@@ -94,6 +98,7 @@ int main( int argc, char * argv[] )
         
         /* Host -> User: (bytes_s, bytes_B) */
         srp_user_process_challenge( usr, bytes_s, len_s, bytes_B, len_B, &bytes_M, &len_M );
+    printf("len_M: %d\n", len_M);
         
         if ( !bytes_M )
         {
